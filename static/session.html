@@ -1,0 +1,63 @@
+<html>
+<head>
+    <script type="text/javascript" src="https://tonejs.github.io/Logo/build/Logo.js"></script>
+    <script type="text/javascript" src="./MidiConvert.js"></script>
+    <script>
+        var inputDevice = null;
+        var outputDevice = null;
+        var melody = [];
+        navigator.requestMIDIAccess({sysex:false}).then(onDeviceConnect, onError);
+
+        function onDeviceConnect(midiAccess) {
+            var inputIterator = midiAccess.inputs.values();
+            for(var o = inputIterator.next(); !o.done; o = inputIterator.next()) {
+                inputDevice = o.value;
+                console.log(inputDevice);
+                break;
+            }
+
+            var outputIterator = midiAccess.outputs.values();
+            for(var o = outputIterator.next(); !o.done; o = outputIterator.next()) {
+                outputDevice = o.value;
+                console.log(outputDevice);
+                break;
+            }
+
+            if(inputDevice != null){
+                inputDevice.onmidimessage = onMIDIEvent;
+            }
+        }
+
+        function onError(msg){
+            console.log("error occurred!")
+        }
+
+        function onMIDIEvent(event){
+            if(event.data[0] == 0xFE){
+                return 0; // avoid active sensing
+            }
+            if(event.data.length > 1){
+                var es = [];
+                for(var i = 0; i < event.data.length; i++){
+                    var e = event.data[i].toString(16);
+                    es.push(e);
+                }
+                var eventString = es.map(function(i){ return "0x" + i;}).join(",");
+                console.log(eventString);
+            }
+
+            if(melody.length > 10){
+                var midi = MidiConvert.create();
+                var track = midi.track().patch(32);
+                for(var i = 0; i < melody.length; i++){
+                    track.note(melody[i][0], melody[i][1], melody[i][2]);
+                }
+                melody = [];
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>MIDI TEST!</h1>
+</body>
+</html>
