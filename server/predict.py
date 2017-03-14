@@ -29,14 +29,17 @@ def _steps_to_seconds(steps, qpm):
 
 def generate_midi(midi_data, total_seconds=10):
     primer_sequence = magenta.music.midi_io.midi_to_sequence_proto(midi_data)
-
     # predict the tempo
     if len(primer_sequence.notes) > 4:
-        estimated_tempo = midi_data.estimate_tempo()
-        if estimated_tempo > 240:
-            qpm = estimated_tempo / 2
-        else:
-            qpm = estimated_tempo
+        try:
+            estimated_tempo = midi_data.estimate_tempo()
+            if estimated_tempo > 240:
+                qpm = estimated_tempo / 2
+            else:
+                qpm = estimated_tempo
+        except Exception as ex:
+            print(ex)
+            qpm = 120        
     else:
         qpm = 120
     primer_sequence.tempos[0].qpm = qpm
@@ -45,9 +48,9 @@ def generate_midi(midi_data, total_seconds=10):
     # Set the start time to begin on the next step after the last note ends.
     last_end_time = (max(n.end_time for n in primer_sequence.notes)
                      if primer_sequence.notes else 0)
+    start_time = last_end_time + _steps_to_seconds(1, qpm)
     generator_options.generate_sections.add(
-        start_time=last_end_time + _steps_to_seconds(1, qpm),
-        end_time=total_seconds)
+        start_time=start_time, end_time=total_seconds)
 
     # generate the output sequence
     generated_sequence = generator.generate(primer_sequence, generator_options)

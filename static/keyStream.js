@@ -19,9 +19,7 @@ var KeyStream = (function(){
     };
     KeyStream.prototype.record = function(operation, code, velocity){
         if(operation == 0x90){//note on
-            if(code in this.noteOns){
-                this.off(code);
-            }else{
+            if(!(code in this.noteOns)){
                 this.noteOns[code] = new Date();
             }
         }else if(operation == 0x80){//note off

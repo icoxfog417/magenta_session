@@ -59,10 +59,11 @@ var MIDIInterface = (function () {
     MIDIInterface.prototype.generate = function () {
         this.magentaTurn = true;
         var playerTrack = this.keyStream.toTrack(this.playerInstrument);
-        console.log(playerTrack);
         var response = MidiConvert.create();
         var self = this;
-        response.load("/predict?duration=" + this.magentaTurnSeconds, JSON.stringify(playerTrack.toArray()), "POST").then(function(f){
+        var totalSeconds = this.playerTurnSeconds + this.magentaTurnSeconds;
+        response.load("/predict?duration=" + totalSeconds, JSON.stringify(playerTrack.toArray()), "POST").then(function(f){
+            f = f.slice(self.playerTurnSeconds);
             self.playMIDI(f);
             //self.downloadMIDI(f);
             setTimeout(function(){
@@ -95,13 +96,7 @@ var MIDIInterface = (function () {
     };
     MIDIInterface.prototype.playMIDI = function (midi) {
         Tone.Transport.bpm.value = midi.header.bpm;
-        var melody = [];
-        for(var i = midi.tracks.length - 1; i > -1; i--){
-            if(midi.tracks[i].notes.length > 0){
-                melody = midi.tracks[i].notes;
-                break;
-            }
-        }
+        var melody = midi.tracks[1].notes;
         if(melody.length > 0){
             var self = this;
             var midiPart = new Tone.Part(function(time, note) {
