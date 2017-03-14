@@ -1,0 +1,108 @@
+<html>
+<head>
+    <script type="text/javascript" src="{{ url_for('static', filename='Tone.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='MidiConvert.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='keyStream.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.3.2/css/bulma.css">
+    <script
+        src="https://code.jquery.com/jquery-3.1.1.min.js"
+        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+        crossorigin="anonymous"></script>
+    <script>
+        var midiEvents = [
+            {"data": [0x90, 0x30, 0x57]},
+            {"data": [0x80, 0x30, 0x40]},
+            {"data": [0x90, 0x3C, 0x57]},
+            {"data": [0x90, 0x3C, 0x57]},
+            {"data": [0x80, 0x3C, 0x40]}
+        ];
+        var synth = new Tone.PolySynth(8).toMaster()
+        function log(log, clear){
+            if(clear !== undefined){
+                $("#log").empty();
+            }
+            $("#log").append("<p>" + log + "</p>");
+        }
+        function run(){
+            var stream = new KeyStream();
+            var interval = 500;
+            var play = function(index){
+                setTimeout(function(){
+                    stream.in(midiEvents[index])
+                }, interval * index);
+            };
+            for(var i = 0; i < midiEvents.length; i++){
+                play(i);
+            }
+
+            setTimeout(function(){
+                var midi = stream.toTrack();
+                console.log(midi);
+                playMIDI(midi);
+                //midiDownload(midi);
+            }, interval * midiEvents.length);
+        }
+        function midiDownload(midi){
+            log("download midi...");
+            var a = document.createElement("a");
+            a.download = "output.midi";
+            a.target = "_blank";
+            var bytechars = midi.encode();
+            var byteNumbers = new Array(bytechars.length);
+            for (var i = 0; i < bytechars.length; i++) {
+                byteNumbers[i] = bytechars.charCodeAt(i);
+            }
+            var byteArray = new Uint8Array(byteNumbers);
+            var blob = new Blob([byteArray], {type: 'application/x-pkcs12'})
+            a.href = URL.createObjectURL(blob);
+            a.click();
+            log("done!");
+        }
+        function playMIDI(midi){
+            Tone.Transport.bpm.value = midi.header.bpm;
+            var midiPart = new Tone.Part(function(time, note) {
+                synth.triggerAttackRelease(note.name, note.duration, time, note.velocity)
+                console.log("x");
+            }, midi.tracks[midi.tracks.length - 1].notes).start()
+            
+            Tone.Transport.start()
+        }
+        function sendMidi(){
+            var MAX_DURATION = 10;
+            var midi = MidiConvert.create();
+            midi.track().patch(32).note(60, 0, 2).note(63, 1, 2).note(60, 2, 2);
+            var duration = midi.duration;
+            if(duration > MAX_DURATION){
+                midi.slice(0, MAX_DURATION);
+                duration = MAX_DURATION;
+            }
+            duration = 10;
+            
+            /*
+            $.post("/predict?duration=" + duration, JSON.stringify(midi.toArray())).done(function(file){
+                console.log(file);
+                var midi = MidiConvert.parse(file);
+                //midiDownload(midi);
+                playMIDI(midi);
+            })*/
+            var response = MidiConvert.create();
+            response.load("/predict?duration=" + duration, JSON.stringify(midi.toArray()), "POST").then(function(f){
+                console.log("midi is made");
+                f.tracks.forEach(function(t){ t.patch(35); });
+                playMIDI(f)
+                //midiDownload(f);
+            });
+        }
+    </script>
+</head>
+<body class="layout-documentation page-elements section">
+    <h1 class="title">MIDI TEST!</h1>
+    <hr>
+    <div class="section">
+        <button class="button" onclick="run()">Create MIDI File</button>
+        <button class="button" onClick="sendMidi()">Send MIDI Data</button>
+    </div>
+    <div id="log">
+    </div>
+</body>
+</html>

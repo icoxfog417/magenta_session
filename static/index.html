@@ -1,0 +1,121 @@
+<html>
+<head>
+    <title>Magenta Session</title>
+    <script type="text/javascript" src="{{ url_for('static', filename='Tone.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='MidiConvert.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='keyStream.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='midiInterface.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.3.2/css/bulma.css">
+    <script
+        src="https://code.jquery.com/jquery-3.1.1.min.js"
+        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+        crossorigin="anonymous"></script>
+    <script>
+        var MIDIInterface = new MIDIInterface(3, 3);
+        MIDIInterface.listen(function(){
+            $("#device").text("Device " + MIDIInterface.inputDevice.name + " connected!");
+        });
+        var sessionTimer = null;
+
+        function onSetSecond(el, player){
+            $(el).parent().find("a").removeClass("is-primary");
+            $(el).addClass("is-primary");
+            var s = parseInt($(el).data("second"));
+            if(player){
+                MIDIInterface.playerTurnSeconds = s;            
+            }else{
+                MIDIInterface.magentaTurnSeconds = s;
+            }
+        }
+
+        $(function(){
+            $(".player").find("a").each(function(){
+                $(this).click(function(){
+                    onSetSecond(this, true);
+                });
+            });
+            $(".magenta").find("a").each(function(){
+                $(this).click(function(){
+                    onSetSecond(this, false);
+                });
+            });
+
+            $("#start").click(function(){
+                MIDIInterface.session(true);
+                sessionTimer = setInterval(function(){
+                    var turn = MIDIInterface.magentaTurn;
+                    var elapse = MIDIInterface.step();
+                    var length = turn ? MIDIInterface.magentaTurnSeconds : MIDIInterface.playerTurnSeconds;
+                    var rate = Math.round(elapse / length * 100);
+                    $("#status").find("div").removeClass("active");
+                    if(turn){
+                        $("#magenta").addClass("active");
+                    }else{
+                        $("#you").addClass("active");                        
+                    }
+                    $("#progress").attr("value", rate);
+                }, 100);
+            })
+            $("#stop").click(function(){
+                MIDIInterface.session(false);
+                clearInterval(sessionTimer);
+            })
+        })
+    </script>
+    <style>
+        .status-card{
+            width: 150px;
+            height: 150px;
+            font-size: 20px;
+            line-height: 150px;
+            background-color: whitesmoke;
+            margin: 5px;
+        }
+        .status-card p{
+            text-align: center;
+            width: 100%;
+        }
+        .status-card.active{
+            background-color: #22c65b;
+            color: white;
+        }
+    </style>
+</head>
+<body class="layout-documentation page-elements section">
+    <h1 class="title">Let's Connect Your Instrument And Play With Magenta!</h1>
+    <hr>
+    <div class="columns" style="width:800px">
+        <div class="column">
+            <h2 class="subtitle">Player</h2>
+            <div class="block player">
+                <a class="button is-outlined is-primary" data-second="3">3 sec</a>
+                <a class="button is-outlined" data-second="5">5 sec</a>
+                <a class="button is-outlined" data-second="8">8 sec</a>
+                <a class="button is-outlined" data-second="13">13 sec</a>
+            </div>
+            <h2 class="subtitle">Magenta</h2>
+            <div class="block magenta">
+                <a class="button is-outlined is-primary" data-second="3">3 sec</a>
+                <a class="button is-outlined" data-second="5">5 sec</a>
+                <a class="button is-outlined" data-second="8">8 sec</a>
+                <a class="button is-outlined" data-second="13">13 sec</a>
+            </div>
+            <div>
+                <button id="start" class="button is-primary" >Session Start</button>
+                <button id="stop" class="button is-danger" >Session Stop</button>
+            </div>
+        </div>
+        <div class="column">
+            <div id="device" class="notification"></div>
+            <progress id="progress" class="progress is-primary" value="0" max="100"></progress>
+            <div id="status" class="tile">
+                <div id="you" class="tile status-card active">
+                    <p>You</p>
+                </div>
+                <div id="magenta" class="tile status-card">
+                    <p>Magenta</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body></html>
