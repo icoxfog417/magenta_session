@@ -27,3 +27,20 @@ The model is ported from [ai-duet](https://github.com/googlecreativelab/aiexperi
 `magenta_session` depends on TensorFlow and magenta.  
 Please refer [magenta installation guide](https://github.com/tensorflow/magenta#installation).
 
+Dependencies
+
+Python
+
+* [magenta](https://github.com/tensorflow/magenta)
+* [TensorFlow](https://github.com/tensorflow/tensorflow)
+* [Flask](https://github.com/pallets/flask)
+
+JavaScript
+
+* [Tone.js](https://github.com/Tonejs/Tone.js)
+* [MidiConvert](https://github.com/Tonejs/MidiConvert)
+* [jQuery](https://github.com/jquery/jquery)
+
+CSS
+
+* [Bulma](http://bulma.io/)
