@@ -1,0 +1,3 @@
+tensorflow==0.12.1
+magenta==0.1.9
+Flask==0.12
