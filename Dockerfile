@@ -1,7 +1,7 @@
 # magenta-session Dockerfile
 
 # base image
-FROM tensorflow/magenta:0.1.9
+FROM tensorflow/magenta:0.1.10
 
 # installing  library
 COPY ./requirements.txt /tmp/
