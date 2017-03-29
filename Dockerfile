@@ -11,8 +11,7 @@ RUN pip install -r /tmp/requirements.txt
 COPY . /src/
 
 # port
-EXPOSE 8080
+#EXPOSE 8080
 
 # deamon run
-WORKDIR /src/server/
-ENTRYPOINT python server.py
+CMD python /src/server/server.py
