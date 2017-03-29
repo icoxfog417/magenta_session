@@ -14,4 +14,5 @@ COPY . /src/
 #EXPOSE 8080
 
 # deamon run
-CMD python /src/server/server.py
+WORKDIR /src/server/
+CMD python server.py
