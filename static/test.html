@@ -1,10 +1,20 @@
 <html>
 <head>
+    <script
+        src="https://code.jquery.com/jquery-3.1.1.min.js"
+        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+        crossorigin="anonymous"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='Tone.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='MidiConvert.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='keyStream.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='midiInterface.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='keyboard/draggabilly.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='keyboard/StartAudioContext.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='keyboard/Interface.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='keyboard/Keyboard.js') }}"></script>
+
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.3.2/css/bulma.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='keyboard/keyboard.css') }}">
     <script
         src="https://code.jquery.com/jquery-3.1.1.min.js"
         integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
@@ -131,7 +141,19 @@
         <button class="button" onClick="sendMidi()">Send MIDI Data</button>
         <button class="button" onClick="recordMidi()">Record MIDI Data</button>
     </div>
+    <div id="Content" class="FullScreen">
+		<div id="Keyboard"></div>
+	</div>
     <div id="log">
     </div>
+    <script>
+        var keyboard = Interface.Keyboard();
+        keyboard.keyDown = function (note) {
+		    synth.triggerAttack(note);
+		};
+		keyboard.keyUp = function (note) {
+		    synth.triggerRelease(note);
+		};
+    </script>
 </body>
 </html>
