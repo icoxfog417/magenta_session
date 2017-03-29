@@ -1,37 +1,54 @@
 <html>
 <head>
     <title>Magenta Session</title>
-    <script type="text/javascript" src="{{ url_for('static', filename='Tone.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='MidiConvert.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='keyStream.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='midiInterface.js') }}"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.3.2/css/bulma.css">
     <script
         src="https://code.jquery.com/jquery-3.1.1.min.js"
         integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
         crossorigin="anonymous"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='Tone.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='MidiConvert.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='keyStream.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='midiInterface.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='keyboard/draggabilly.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='keyboard/StartAudioContext.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='keyboard/Interface.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='keyboard/Keyboard.js') }}"></script>
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.3.2/css/bulma.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='keyboard/keyboard.css') }}">
     <script>
         var mInterface = new MIDIInterface(3, 3);
-        var Recorded = null;
-
+        var synth = new Tone.PolySynth(6, Tone.Synth, {
+			"oscillator" : {
+				"partials" : [0, 2, 3, 4],
+			}
+		}).toMaster();
         mInterface.listen(function(){
-            $("#device").text("Device " + mInterface.inputDevice.name + " connected!");
+            if(mInterface.inputDevice){
+                $("#device").text("Device " + mInterface.inputDevice.name + " connected!");
+            }
         });
         var sessionTimer = null;
 
-        function onSetSecond(el, player){
+        function onSetSecond(el, isMagenta){
             $(el).parent().find("a").removeClass("is-primary");
             $(el).addClass("is-primary");
             var s = parseInt($(el).data("second"));
-            if(player){
-                mInterface.playerTurnSeconds = s;            
-            }else{
+            if(isMagenta){
                 mInterface.magentaTurnSeconds = s;
+            }else{
+                mInterface.playerTurnSeconds = s;            
             }
         }
 
+        function resetStatus(){
+            clearInterval(sessionTimer);
+            $("#download").removeClass("is-primary");
+            $("#session").empty();
+        }
+
         $(function(){
-            $(".player").find("a").each(function(){
+            $(".you").find("a").each(function(){
                 $(this).click(function(){
                     onSetSecond(this, true);
                 });
@@ -44,80 +61,180 @@
 
             $("#start").click(function(){
                 mInterface.session(true);
+                resetStatus();
                 sessionTimer = setInterval(function(){
                     var turn = mInterface.magentaTurn;
                     var elapse = mInterface.step();
                     var length = turn ? mInterface.magentaTurnSeconds : mInterface.playerTurnSeconds;
                     var rate = Math.round(elapse / length * 100);
-                    $("#status").find("div").removeClass("active");
+                    var magentaStatus = $(".card.main.active").attr("id") === "magenta";
+                    if(magentaStatus != turn){
+                        if(turn){
+                            //to magenta
+                            $("#session").append("<div class='session-unit you'></div>");
+                        }else{
+                            //to you
+                            $("#session").append("<div class='session-unit magenta'></div>");
+                        }
+                    }
+
+                    $(".card.main").removeClass("active");
                     if(turn){
                         $("#magenta").addClass("active");
+                        $("#magenta progress").attr("value", rate);
                     }else{
                         $("#you").addClass("active");                        
+                        $("#you progress").attr("value", rate);
                     }
-                    $("#progress").attr("value", rate);
                 }, 100);
             })
             $("#stop").click(function(){
                 mInterface.session(false);
                 clearInterval(sessionTimer);
+                if(mInterface.recorded.length > 0){
+                    $("#download").addClass("is-primary");
+                }
+            })
+            $("#download").click(function(){
+                mInterface.session(false);
+                clearInterval(sessionTimer);
+                if(mInterface.recorded.length > 0){
+                    var r = mInterface.getRecordedMIDI();
+                    mInterface.downloadMIDI(r);
+                }else{
+                    alert("Recorded data is not Exist!");
+                }
             })
         })
     </script>
     <style>
-        .status-card{
+        .status{
+            margin: auto;
             width: 150px;
             height: 150px;
-            font-size: 20px;
-            line-height: 150px;
-            background-color: whitesmoke;
-            margin: 5px;
         }
-        .status-card p{
-            text-align: center;
-            width: 100%;
+        #session{
+            height: 50px;
         }
-        .status-card.active{
-            background-color: #22c65b;
-            color: white;
+        .session-unit {
+            width: 50px;
+            margin: 3px;
+            float:left;
+        }
+        .session-unit.you{
+            background-color: #00c4a7;
+        }
+        .session-unit.magenta{
+            background-color: #ffd83d;
+        }
+        .card-footer-item.is-primary{
+            background-color: #00c4a7;
+            border-color: transparent;
+            color: #fff;
+        }
+        .card-footer-item.is-danger{
+            background-color: #ff3860;
+            border-color: transparent;
+            color: #fff;
+        }
+        .footer{
+            background-color: white;
+            margin-top:20px;
         }
     </style>
 </head>
 <body class="layout-documentation page-elements section">
     <h1 class="title">Let's Connect Your Instrument And Play With Magenta!</h1>
     <hr>
-    <div class="columns" style="width:800px">
-        <div class="column">
-            <h2 class="subtitle">Player</h2>
-            <div class="block player">
-                <a class="button is-outlined is-primary" data-second="3">3 sec</a>
-                <a class="button is-outlined" data-second="5">5 sec</a>
-                <a class="button is-outlined" data-second="8">8 sec</a>
-                <a class="button is-outlined" data-second="13">13 sec</a>
+    <div style="width:800px">
+        <div class="columns">
+            <div class="column">
+                <div id="you" class="card main active">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                            You
+                        </p>
+                    </header>
+                    <div class="card-content">
+                        <div class="status">
+                            <figure class="image is-128x128">
+                                <img src="{{ url_for('static', filename='imgs/you.jpg') }}" alt="you"/>
+                            </figure>
+                        </div>
+                        <progress id="progress" class="progress is-primary" value="0" max="100"></progress>
+                    </div>
+                    <footer class="card-footer you">
+                        <a class="card-footer-item is-primary" data-second="3">3 sec</a>
+                        <a class="card-footer-item" data-second="5">5 sec</a>
+                        <a class="card-footer-item" data-second="8">8 sec</a>
+                        <a class="card-footer-item" data-second="13">13 sec</a>                
+                    </footer>
+                </div>
             </div>
-            <h2 class="subtitle">Magenta</h2>
-            <div class="block magenta">
-                <a class="button is-outlined is-primary" data-second="3">3 sec</a>
-                <a class="button is-outlined" data-second="5">5 sec</a>
-                <a class="button is-outlined" data-second="8">8 sec</a>
-                <a class="button is-outlined" data-second="13">13 sec</a>
-            </div>
-            <div>
-                <button id="start" class="button is-primary" >Session Start</button>
-                <button id="stop" class="button is-danger" >Session Stop</button>
+            <div class="column">
+                <div id="magenta" class="card main">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                            Magenta
+                        </p>
+                    </header>
+                    <div class="card-content">
+                        <div class="status">
+                            <figure class="image is-128x128">
+                                <img src="{{ url_for('static', filename='imgs/magenta.PNG') }}" alt="magenta"/>
+                            </figure>
+                        </div>
+                        <progress id="progress" class="progress is-warning" value="0" max="100"></progress>
+                    </div>
+                    <footer class="card-footer magenta">
+                        <a class="card-footer-item is-primary" data-second="3">3 sec</a>
+                        <a class="card-footer-item" data-second="5">5 sec</a>
+                        <a class="card-footer-item" data-second="8">8 sec</a>
+                        <a class="card-footer-item" data-second="13">13 sec</a>                
+                    </footer>
+                </div>
             </div>
         </div>
-        <div class="column">
-            <div id="device" class="notification"></div>
-            <progress id="progress" class="progress is-primary" value="0" max="100"></progress>
-            <div id="status" class="tile">
-                <div id="you" class="tile status-card active">
-                    <p>You</p>
+        <div>
+            <div class="card">
+                <header class="card-header">
+                    <p class="card-header-title">
+                        Console
+                    </p>
+                </header>
+                <div class="card-content">
+                    <div id="device" class="notification"></div>
+                    <div id="session" class="tile is-ancestor"></div>
+                    <br style="clear:both"/>
                 </div>
-                <div id="magenta" class="tile status-card">
-                    <p>Magenta</p>
-                </div>
+                <footer class="card-footer">
+                    <a id="start" class="card-footer-item is-primary">Session Start</a>
+                    <a id="stop" class="card-footer-item is-danger">Session Stop</a>
+                    <a id="download" class="card-footer-item">Download</a>
+                </footer>
             </div>
         </div>
     </div>
+    <footer class="footer">
+      <div class="container">
+        <div id="Content" class="FullScreen">
+            <div id="Keyboard"></div>
+        </div>
+    </div>
+    </footer>
+    <script>
+        var keyboard = Interface.Keyboard();
+        keyboard.keyDown = function (note) {
+            synth.triggerAttack(note);
+            if(!mInterface.inputDevice){
+                mInterface.onMIDIEvent(mInterface, {"data": [0x90, note, 0x26]});
+            }
+        };
+        keyboard.keyUp = function (note) {
+            synth.triggerRelease(note);
+            if(!mInterface.inputDevice){
+                mInterface.onMIDIEvent(mInterface,  {"data": [0x80, note, 0x40]});
+            }
+        };
+    </script>
 </body></html>

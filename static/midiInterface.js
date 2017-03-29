@@ -63,8 +63,9 @@ var MIDIInterface = (function () {
         self.keyStream.in(event);
         self.step();
     };
-    MIDIInterface.prototype.generate = function () {
+    MIDIInterface.prototype.generate = function () {        
         this.magentaTurn = true;
+        this.startTime = new Date(); // start Magenta Turn
         var playerTrack = this.keyStream.toTrack(this.playerInstrument);
         var response = MidiConvert.create();
         var self = this;
@@ -92,7 +93,8 @@ var MIDIInterface = (function () {
 
     MIDIInterface.prototype.step = function () {
         var elapseSeconds = this.getElapse();
-        if(Math.round(elapseSeconds) >= this.playerTurnSeconds){
+        var underBound = Math.round(elapseSeconds * 1000) / 1000;
+        if(underBound >= this.playerTurnSeconds){
             if(this.keyStream.notePlays.length > 0 && !this.magentaTurn){
                 this.generate();
             }else if(!this.magentaTurn){
@@ -116,7 +118,7 @@ var MIDIInterface = (function () {
         }
     };
 
-    MIDIInterface.prototype.getRecorded = function(){
+    MIDIInterface.prototype.getRecordedMIDI = function(){
         var recorded = MidiConvert.create();
         var startTime = 0;
         for(var i = 0; i < this.recorded.length; i++){

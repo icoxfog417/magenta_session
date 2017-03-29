@@ -126,7 +126,7 @@
             }
             setTimeout(function(){
                 mInterface.session(false);
-                var r = mInterface.getRecorded();
+                var r = mInterface.getRecordedMIDI();
                 mInterface.downloadMIDI(r);
             }, startTime + 0.5);
             
