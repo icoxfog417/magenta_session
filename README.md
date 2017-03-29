@@ -1,9 +1,10 @@
 # magenta session
 
 The code to session with [magenta](https://github.com/tensorflow/magenta).  
-Do you have any MIDI instrument? If then, you can do call & response with magenta!
+Do you have any MIDI instrument? If then, you can do call & response with magenta!  
+(You don't have such instruments? Of course, you can play this without it!)
 
-**[You can see the sample play from here](https://www.youtube.com/watch?v=eG31FqD7uGs&feature=youtu.be).**  
+**[You can see the sample play from here](https://youtu.be/owOI2CMavoE).**  
 (Sorry about my poor keyboard play)
 
 ## Architecture
