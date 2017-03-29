@@ -4,16 +4,15 @@
 FROM tensorflow/magenta:0.1.10
 
 # installing  library
-COPY ./requirements_heroku.txt /tmp/
-RUN pip install -r /tmp/requirements_heroku.txt
+COPY ./requirements.txt /tmp/
+RUN pip install -r /tmp/requirements.txt
 
 # deploy magenta-session module
-COPY . /opt/
+COPY . /src/
 
 # port
 #EXPOSE 8080
 
 # deamon run
-WORKDIR /opt/server/
-# CMD python server.py
-CMD gunicorn -b 0.0.0.0:$PORT server:app
+WORKDIR /src/server/
+CMD python server.py

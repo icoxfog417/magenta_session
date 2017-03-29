@@ -2,6 +2,5 @@
     "name": "magenta session",
     "description": "Music Session with Google Magenta",
     "repository": "https://github.com/icoxfog417/magenta_session",
-    "keywords": ["Python", "Google Magenta", "Music"],
-    "image": "registry.heroku.com/magenta-session/web"
+    "keywords": ["Python", "Google Magenta", "Music"]
 }
