@@ -11,9 +11,11 @@
         integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
         crossorigin="anonymous"></script>
     <script>
-        var MIDIInterface = new MIDIInterface(3, 3);
-        MIDIInterface.listen(function(){
-            $("#device").text("Device " + MIDIInterface.inputDevice.name + " connected!");
+        var mInterface = new MIDIInterface(3, 3);
+        var Recorded = null;
+
+        mInterface.listen(function(){
+            $("#device").text("Device " + mInterface.inputDevice.name + " connected!");
         });
         var sessionTimer = null;
 
@@ -22,9 +24,9 @@
             $(el).addClass("is-primary");
             var s = parseInt($(el).data("second"));
             if(player){
-                MIDIInterface.playerTurnSeconds = s;            
+                mInterface.playerTurnSeconds = s;            
             }else{
-                MIDIInterface.magentaTurnSeconds = s;
+                mInterface.magentaTurnSeconds = s;
             }
         }
 
@@ -41,11 +43,11 @@
             });
 
             $("#start").click(function(){
-                MIDIInterface.session(true);
+                mInterface.session(true);
                 sessionTimer = setInterval(function(){
-                    var turn = MIDIInterface.magentaTurn;
-                    var elapse = MIDIInterface.step();
-                    var length = turn ? MIDIInterface.magentaTurnSeconds : MIDIInterface.playerTurnSeconds;
+                    var turn = mInterface.magentaTurn;
+                    var elapse = mInterface.step();
+                    var length = turn ? mInterface.magentaTurnSeconds : mInterface.playerTurnSeconds;
                     var rate = Math.round(elapse / length * 100);
                     $("#status").find("div").removeClass("active");
                     if(turn){
@@ -57,7 +59,7 @@
                 }, 100);
             })
             $("#stop").click(function(){
-                MIDIInterface.session(false);
+                mInterface.session(false);
                 clearInterval(sessionTimer);
             })
         })

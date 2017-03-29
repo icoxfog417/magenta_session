@@ -3,6 +3,7 @@ var MIDIInterface = (function () {
         this.inputDevice = null;
         this.outputDevice = null;
         this.inSession = false;
+        this.recorded = [];
         this.keyStream = new KeyStream();
         this.playerTurnSeconds = playerTurnSeconds;
         this.magentaTurnSeconds = magentaTurnSeconds;
@@ -43,11 +44,17 @@ var MIDIInterface = (function () {
     MIDIInterface.prototype.onDeviceError = function () {
         console.log("error occurred!")
     };
-    MIDIInterface.prototype.session = function (isOn) {
-        this.inSession = isOn;
+    MIDIInterface.prototype.timeReset = function () {
         this.keyStream.reset();
         this.startTime = new Date();
+    };
+    MIDIInterface.prototype.session = function (isOn) {
+        if(!this.inSession && isOn){//begin new session
+            this.recorded = [];
+        };
+        this.inSession = isOn;
         this.magentaTurn = false;
+        this.timeReset();
     };
     MIDIInterface.prototype.onMIDIEvent = function (self, event) {
         if(!self.inSession){
@@ -62,13 +69,15 @@ var MIDIInterface = (function () {
         var response = MidiConvert.create();
         var self = this;
         var totalSeconds = this.playerTurnSeconds + this.magentaTurnSeconds;
+        self.recorded.push([false, playerTrack]);
+        setTimeout(function(){
+            self.magentaTurn = false;
+            self.timeReset();
+        }, self.magentaTurnSeconds * 1000);
         response.load("/predict?duration=" + totalSeconds, JSON.stringify(playerTrack.toArray()), "POST").then(function(f){
             f = f.slice(self.playerTurnSeconds);
+            self.recorded.push([true, f]);
             self.playMIDI(f);
-            //self.downloadMIDI(f);
-            setTimeout(function(){
-                self.magentaTurn = false;
-            }, self.magentaTurnSeconds * 1000);
         }, function(){
             self.magentaTurn = false;            
         });
@@ -83,13 +92,11 @@ var MIDIInterface = (function () {
 
     MIDIInterface.prototype.step = function () {
         var elapseSeconds = this.getElapse();
-        if(elapseSeconds > this.playerTurnSeconds && !this.magentaTurn){
-            if(this.keyStream.notePlays.length == 0){
-                this.startTime = new Date(); //wait till midi in
-                this.keyStream.reset();
-            }else{
+        if(Math.round(elapseSeconds) >= this.playerTurnSeconds){
+            if(this.keyStream.notePlays.length > 0 && !this.magentaTurn){
                 this.generate();
-                this.startTime = new Date(); //update for next
+            }else if(!this.magentaTurn){
+                this.timeReset();
             }
         }
         return elapseSeconds;
@@ -108,6 +115,29 @@ var MIDIInterface = (function () {
             console.log("no melody found");
         }
     };
+
+    MIDIInterface.prototype.getRecorded = function(){
+        var recorded = MidiConvert.create();
+        var startTime = 0;
+        for(var i = 0; i < this.recorded.length; i++){
+            var isMagenta = this.recorded[i][0];
+            var midi = this.recorded[i][1];
+            var track = isMagenta ? midi.tracks[1] : midi.tracks[0];
+            var instrumentId = track.instrumentNumber.toString();
+            var rTrack = recorded.get(instrumentId);
+            if(!rTrack){
+                rTrack = recorded.track(instrumentId);
+                if(track.instrumentNumber > 0){
+                    rTrack = rTrack.patch(track.instrumentNumber);
+                }
+            }
+            track.notes.forEach(function(n){
+                rTrack.note(n.name, n.time + startTime, n.duration);
+            });
+            startTime += track.duration;
+        }
+        return recorded;
+    }
 
     MIDIInterface.prototype.downloadMIDI = function(midi){
         var a = document.createElement("a");

@@ -3,6 +3,7 @@
     <script type="text/javascript" src="{{ url_for('static', filename='Tone.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='MidiConvert.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='keyStream.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='midiInterface.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.3.2/css/bulma.css">
     <script
         src="https://code.jquery.com/jquery-3.1.1.min.js"
@@ -93,6 +94,33 @@
                 //midiDownload(f);
             });
         }
+        function recordMidi(){
+            var duration = 3;
+            var mInterface = new MIDIInterface(duration, duration);
+            var noteDuration = duration / midiEvents.length;
+            var midiPlay = midiEvents.map(function(e, i){
+                e["startTime"] = noteDuration * (i + 1) * 1000;
+                return e;
+            });
+
+            mInterface.session(true);
+            var playCount = 2;
+            var startTime = 0;
+            for(var i = 0; i < playCount; i++){
+                midiPlay.forEach(function(e){
+                    setTimeout(function(){
+                        mInterface.onMIDIEvent(mInterface, e);
+                    }, startTime + e.startTime);
+                });
+                startTime += duration * 2 * 1000; // player turn + magenta turn
+            }
+            setTimeout(function(){
+                mInterface.session(false);
+                var r = mInterface.getRecorded();
+                mInterface.downloadMIDI(r);
+            }, startTime + 0.5);
+            
+        }
     </script>
 </head>
 <body class="layout-documentation page-elements section">
@@ -101,6 +129,7 @@
     <div class="section">
         <button class="button" onclick="run()">Create MIDI File</button>
         <button class="button" onClick="sendMidi()">Send MIDI Data</button>
+        <button class="button" onClick="recordMidi()">Record MIDI Data</button>
     </div>
     <div id="log">
     </div>
