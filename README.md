@@ -11,6 +11,8 @@ Do you have any MIDI instrument? If then, you can do call & response with magent
 
 (Sorry about my poor keyboard play!)
 
+You can deploy your own Magenta Session to Heroku by following button.
+
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 ## Architecture
