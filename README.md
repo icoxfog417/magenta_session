@@ -53,3 +53,23 @@ JavaScript
 CSS
 
 * [Bulma](http://bulma.io/)
+
+## Docker
+Docker is an open-source containerization software which simplifies installation across various OSes.Once you have Docker installed, you can just run:
+
+```bash
+$ docker run -it --rm -p 80:8080 asashiho/magenta_session
+```
+
+If you want to build DockerImage yourself, you can just run:
+
+```bash
+$ docker build -t magenta_session .
+$ docker run -it --rm -p 80:8080 magenta-session
+```
+[Tips!]Docker to automatically clean up the container and remove the file system when the container exits, you can add the `--rm`
+
+You can now play with `magenta_session` at `http://<docker-server-ipaddress>/`.
+
+
+Session Now and Enjoy Music!
