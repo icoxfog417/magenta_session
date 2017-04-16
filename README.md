@@ -6,7 +6,7 @@ Do you have any MIDI instrument? If then, you can do call & response with magent
 
 **You can see the sample play from here**
 
-* [Playing Vide](https://youtu.be/owOI2CMavoE)
+* [Playing Video](https://youtu.be/owOI2CMavoE)
 * [Recorded Session](https://soundcloud.com/icoxfog417/magenta-sessioned-track)
 
 (Sorry about my poor keyboard play!)
