@@ -1,2 +1,2 @@
-magenta==0.1.10
-Flask==0.12
+magenta>=0.1.10
+Flask>=0.12

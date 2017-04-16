@@ -2,7 +2,7 @@ import os
 import time
 import tempfile
 import pretty_midi
-
+import tensorflow as tf
 import magenta
 from magenta.models.melody_rnn import melody_rnn_config_flags
 from magenta.models.melody_rnn import melody_rnn_model
@@ -11,21 +11,40 @@ from magenta.protobuf import generator_pb2
 from magenta.protobuf import music_pb2
 
 
-BUNDLE_NAME = 'attention_rnn'
+BUNDLE_NAME = os.getenv("MAGENTA_MODEL", "attention_rnn")
+STEPS_PER_QUARTER = 4
 
-config = magenta.models.melody_rnn.melody_rnn_model.default_configs[BUNDLE_NAME]
-model_file = os.path.join(os.path.dirname(__file__), "../model/" + BUNDLE_NAME + ".mag")
-bundle_file = magenta.music.read_bundle_file(os.path.abspath(model_file))
-steps_per_quarter = 4
-
-generator = melody_rnn_sequence_generator.MelodyRnnSequenceGenerator(
-      model=melody_rnn_model.MelodyRnnModel(config),
-      details=config.details,
-      steps_per_quarter=steps_per_quarter,
-      bundle=bundle_file)
 
 def _steps_to_seconds(steps, qpm):
-    return steps * 60.0 / qpm / steps_per_quarter
+    return steps * 60.0 / qpm / STEPS_PER_QUARTER
+
+
+def make_generator(bundle_name):
+    model_path = os.path.join(os.path.dirname(__file__), "../models/" + bundle_name + ".mag")
+    hparams_path = os.path.join(os.path.dirname(__file__), "../models/" + bundle_name + ".hparams")
+
+    if tf.gfile.Exists(hparams_path):
+        with tf.gfile.Open(hparams_path) as f:
+            config, hparams = f.readline().split("\t")
+        melody_rnn_config_flags.FLAGS.config = config
+        melody_rnn_config_flags.FLAGS.hparams = hparams
+        config = melody_rnn_config_flags.config_from_flags()
+    elif bundle_name in melody_rnn_model.default_configs:
+        config = melody_rnn_model.default_configs[bundle_name]
+    else:
+        raise Exception("can not define the model config.")
+ 
+    generator = melody_rnn_sequence_generator.MelodyRnnSequenceGenerator(
+        model=melody_rnn_model.MelodyRnnModel(config),
+        details=config.details,
+        steps_per_quarter=STEPS_PER_QUARTER,
+        bundle=magenta.music.read_bundle_file(model_path))
+    
+    return generator
+
+
+generator = make_generator(BUNDLE_NAME)
+
 
 def generate_midi(midi_data, total_seconds=10):
     primer_sequence = magenta.music.midi_io.midi_to_sequence_proto(midi_data)
