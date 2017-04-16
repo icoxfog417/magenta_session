@@ -148,7 +148,7 @@ Then invoke the TensorBoard and access [`http://localhost:6006`](http://localhos
 tensorboard --logdir=models/logdir
 ```
 
-![training.png](./docs/training.png)
+![training.PNG](./docs/training.PNG)
 
 ### 5. Create the Model
 
