@@ -1,4 +1,4 @@
-# Session with Your own Model
+# Session with your own model
 
 I think you want to session with your own Musical Model! 
 If so, set the `MAGENTA_MODEL` environmental variable.

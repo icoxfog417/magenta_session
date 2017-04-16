@@ -32,7 +32,7 @@ The model is ported from [ai-duet](https://github.com/googlecreativelab/aiexperi
 
 ### Additional Usage
 
-* [Train Your own Model](https://github.com/icoxfog417/magenta_session/tree/master/scripts)
+* [Train your own model](https://github.com/icoxfog417/magenta_session/tree/master/scripts)
 * [Session with your own model](https://github.com/icoxfog417/magenta_session/tree/master/server)
 
 ## Install 
