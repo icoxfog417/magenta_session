@@ -75,7 +75,7 @@ Then invoke the TensorBoard and access [`http://localhost:6006`](http://localhos
 tensorboard --logdir=models/logdir
 ```
 
-![training.PNG](./docs/training.PNG)
+![training.PNG](../docs/training.PNG)
 
 ## 5. Create the Model
 
@@ -98,3 +98,5 @@ python scripts/models/generate_midi.py --bundle_file=my_model --num_outputs=10 -
 ([parameter is almost same as original](https://github.com/tensorflow/magenta/tree/master/magenta/models/melody_rnn#generate-a-melody))
 
 If it is succeeded, MIDI files will be stored at `data/generated` directory. Sounds Good? Enjoy!
+
+[Now you can play with your own model](https://github.com/icoxfog417/magenta_session/tree/master/server).
