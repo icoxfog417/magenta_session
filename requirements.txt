@@ -1,2 +1,2 @@
-magenta>=0.1.10
+magenta>=0.2.4
 Flask>=0.12

@@ -9,11 +9,13 @@ import scripts.target as tgt
 
 
 def main():
-    with note_sequence_io.NoteSequenceRecordWriter(tgt.SEQUENCE_FILE) as sequence_writer:
-        sequences_written = convert_directory(tgt.MIDI_DIR, "", sequence_writer, True)
-        tf.logging.info("Wrote %d NoteSequence protos to '%s'", 
-            sequences_written, tgt.SEQUENCE_FILE)
+    output_dir = os.path.dirname(tgt.SEQUENCE_FILE)
+    if not os.path.exists(output_dir):
+        tf.gfile.MakeDirs(output_dir)
+
+    convert_directory(tgt.MIDI_DIR, tgt.SEQUENCE_FILE, num_threads=4, recursive=True)
 
 
 if __name__ == '__main__':
+    tf.logging.set_verbosity("INFO")
     main()

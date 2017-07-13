@@ -2,6 +2,7 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
 import tensorflow as tf
+import magenta
 import magenta.models.melody_rnn.melody_rnn_train as mt
 from magenta.models.melody_rnn import melody_rnn_config_flags
 from magenta.models.shared import events_rnn_graph
@@ -26,7 +27,7 @@ def main(unused_argv):
 
         graph = events_rnn_graph.build_graph("train", config, train_file)
         events_rnn_train.run_training(
-            graph, train_dir, mt.FLAGS.num_training_steps, mt.FLAGS.summary_frequency)
+            graph, train_dir, mt.FLAGS.num_training_steps, mt.FLAGS.summary_frequency, checkpoints_to_keep=mt.FLAGS.num_checkpoints)
 
     else:
         eval_file = tf.gfile.Glob(os.path.join(data_dir, "eval_melodies.tfrecord"))
@@ -34,10 +35,18 @@ def main(unused_argv):
         if not os.path.exists(eval_dir):
             tf.gfile.MakeDirs(eval_dir)
         tf.logging.info("Eval dir: %s", eval_dir)
-
+        
+        examples = mt.FLAGS.num_eval_examples if mt.FLAGS.num_eval_examples else magenta.common.count_records(eval_file)
+        
+        if examples >= config.hparams.batch_size:
+            num_batches = examples // config.hparams.batch_size
+        else:
+            config.hparams.batch_size = examples
+            num_batches = 1
+      
         graph = events_rnn_graph.build_graph("eval", config, eval_file)
         events_rnn_train.run_eval(
-            graph, train_dir, eval_dir, mt.FLAGS.num_training_steps, mt.FLAGS.summary_frequency)
+            graph, train_dir, eval_dir, num_batches)
 
 
 def console_entry_point():

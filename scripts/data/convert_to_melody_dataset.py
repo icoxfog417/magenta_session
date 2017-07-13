@@ -18,7 +18,7 @@ def main(unused_argv):
 
 
 def console_entry_point():
-  tf.app.run(main)
+    tf.app.run(main)
 
 
 if __name__ == "__main__":
