@@ -1,7 +1,9 @@
 # magenta-session Dockerfile
 
 # base image
-FROM tensorflow/magenta:0.1.10
+FROM tensorflow/magenta:latest
+
+RUN apt-get update && apt-get install -y --no-install-recommends libasound2-dev && apt-get clean
 
 # installing  library
 COPY ./requirements.txt /tmp/
