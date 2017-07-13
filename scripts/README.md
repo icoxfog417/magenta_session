@@ -57,7 +57,7 @@ If dataset is prepared, you can begin the training!
 Run the `train_model.py` and specify the model parameters like following.
 
 ```
-python scripts/models/train_model.py --config attention_rnn --hparams="{'batch_size':64,'rnn_layer_sizes':[64,64]}" --num_training_steps=20000
+python scripts/models/train_model.py --config attention_rnn --hparams="batch_size=64,rnn_layer_sizes=[64,64]" --num_training_steps=20000
 ```
 
 ([parameter is almost same as original](https://github.com/tensorflow/magenta/tree/master/magenta/models/melody_rnn#train-and-evaluate-the-model))
@@ -66,7 +66,7 @@ You can watch the training state by TensorBoard.
 Run the evaluation script...
 
 ```
-python scripts/models/train_model.py --config attention_rnn --hparams="{'batch_size':64,'rnn_layer_sizes':[64,64]}" --num_training_steps=20000 --eval
+python scripts/models/train_model.py --config attention_rnn --hparams="batch_size=64,rnn_layer_sizes=[64,64]" --num_training_steps=20000 --eval
 ```
 
 Then invoke the TensorBoard and access [`http://localhost:6006`](http://localhost:6006).
