@@ -75,7 +75,7 @@ If you want to build DockerImage yourself, you can just run:
 
 ```bash
 $ docker build -t magenta_session .
-$ docker run -it --rm -p 80:8080 magenta-session
+$ docker run -it --rm -p 80:8080 magenta_session
 ```
 **Tips!** Docker to automatically clean up the container and remove the file system when the container exits, you can add the `--rm`
 
