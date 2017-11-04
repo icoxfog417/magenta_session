@@ -45,7 +45,7 @@ Please refer [magenta installation guide](https://github.com/tensorflow/magenta#
 Install the [Miniconda](https://conda.io/miniconda.html) (Miniconda3 is also ok), and create the Magenta environment.
 
 ```
-conda create -n magenta numpy scipy matplotlib jupyter 
+conda create -n magenta numpy scipy scikit-learn matplotlib jupyter pyyaml
 ```
 
 (If you use Miniconda3, please set `python=2.7` additionaly when create magenta environment. Because Magenta only works on Python2!)

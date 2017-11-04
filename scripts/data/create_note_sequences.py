@@ -13,7 +13,7 @@ def main():
     if not os.path.exists(output_dir):
         tf.gfile.MakeDirs(output_dir)
 
-    convert_directory(tgt.MIDI_DIR, tgt.SEQUENCE_FILE, num_threads=4, recursive=True)
+    convert_directory(tgt.MIDI_DIR, tgt.SEQUENCE_FILE, recursive=True)
 
 
 if __name__ == '__main__':

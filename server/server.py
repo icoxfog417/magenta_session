@@ -1,9 +1,5 @@
 import os
 import sys
-if sys.version_info.major <= 2:
-    from cStringIO import StringIO
-else:
-    from io import StringIO
 import json
 import pretty_midi
 import predict as predictor
@@ -16,7 +12,14 @@ app = Flask(__name__, template_folder=static_path, static_folder=static_path)
 @app.route("/predict", methods=["POST"])
 def predict():
     notes = json.loads(request.get_data())
-    midi_data = pretty_midi.PrettyMIDI(StringIO("".join(chr(n) for n in notes)))
+    if sys.version_info.major <= 2:
+        from cStringIO import StringIO
+        note_stream = StringIO("".join(chr(n) for n in notes))
+    else:
+        from io import BytesIO
+        note_stream = BytesIO("".join(chr(n) for n in notes).encode("latin1"))
+
+    midi_data = pretty_midi.PrettyMIDI(note_stream)
     duration = float(request.args.get("duration"))  #seconds
     generated = predictor.generate_midi(midi_data, duration)
     return send_file(generated, attachment_filename="output.mid", 
