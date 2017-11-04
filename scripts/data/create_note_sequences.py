@@ -12,8 +12,10 @@ def main():
     output_dir = os.path.dirname(tgt.SEQUENCE_FILE)
     if not os.path.exists(output_dir):
         tf.gfile.MakeDirs(output_dir)
-
-    convert_directory(tgt.MIDI_DIR, tgt.SEQUENCE_FILE, num_threads=4, recursive=True)
+    if magenta.__version__ < '0.3.2':
+        convert_directory(tgt.MIDI_DIR, tgt.SEQUENCE_FILE, num_threads=4, recursive=True)
+    else:
+        convert_directory(tgt.MIDI_DIR, tgt.SEQUENCE_FILE, recursive=True)
 
 
 if __name__ == '__main__':
